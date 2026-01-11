@@ -1,0 +1,115 @@
+body{
+    background-color:  #1b2132;
+}
+
+.done span{
+    text-decoration: line-through; 
+    color: gray;      
+}
+
+li {
+    display: flex;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+    overflow-wrap: break-word; /*разрываем и переносим на следующую строку очень длинные слова */  
+    display: flex;
+    align-items: center; /*помещем дочерние элементы точно посередине родительского контейнера, в перпендикулярном направлении к основной оси.*/
+    justify-content: space-between; /*распределяем дочерние элементы внутри контейнера вдоль главной оси (обычно горизонтально) так, чтобы первый элемент прижимался к началу, последний — к концу, а оставшееся пространство равномерно распределялось между элементами */
+    border-bottom: 1px solid  #C6A664;
+    color: #d9dcdd;
+}
+
+li:hover {
+    background-color: #1d284c; /*Подсветка при наведении */
+}
+
+.delBut{
+    background-color: #C6A664;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-left: 10px; /* Небольшой отступ от текста, чтобы не слипались */
+    flex-shrink: 0; /*Запрещаем кнопке сжиматься, если текст слишком длинный */
+    color: #12192f;
+    font-weight: bold;
+}
+
+.taskСontain{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Helvetica, sans-serif ;
+}
+
+#task-input{
+    padding: 12px 15px;
+    border-radius: 15px;
+    flex-grow: 1;
+    color: #d9dcdd;
+    background-color: #1e3376;
+    border: none;
+    outline: none;
+}
+
+textarea{
+    font-family: Helvetica, sans-serif ;
+}
+
+.tasks{
+  width: 100%;
+  max-width: 500px;  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #12192f;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+#task-list{
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#add-btn{
+    margin-left: 5px;
+    padding: 7px 20px;
+    border-radius: 15px;
+    background-color: #1e3376;
+    font-size: 14px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    color: #d9dcdd;
+}
+
+textarea {
+  resize: none;
+}
+
+textarea::placeholder{
+    color: #d9dcdd;
+}
+
+#inpPart{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.title{
+    color: #C6A664;
+    margin-bottom: 7%;
+}
+
+.load{
+    justify-content: center;
+    cursor: default;
+}
