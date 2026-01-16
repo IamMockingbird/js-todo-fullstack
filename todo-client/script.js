@@ -1,4 +1,4 @@
-import {fetchTodos, addTodo, toggleTodo, deleteTodo } from "./api.js";
+import {fetchTodos, addTodo, toggleTodo, deleteTodo, moveTodo } from "./api.js";
 
 const input = document.getElementById('task-input');
 const btn = document.getElementById(`add-btn`);
@@ -12,7 +12,18 @@ const createTaskElement = (task) =>{
     // Создаем HTML
     const newLi = document.createElement('li');
     const liSpan = document.createElement('span');
+    newLi.setAttribute('draggable', 'true');
+    newLi.dataset.id = task.id;
     liSpan.innerText = task.text;
+
+    // Обрабатываем перетаскивание
+    newLi.addEventListener('dragstart', (e) =>{
+        newLi.classList.add('dragging');
+    });
+
+    newLi.addEventListener('dragend', (e) =>{
+        newLi.classList.remove('dragging');
+    });
 
     // Если задача выполнена - добавляем класс
     if (task.done) newLi.classList.add('done');
@@ -108,6 +119,63 @@ const loadInitialData = async () => {
         
     
 }
+
+const getDragAfterElement = (container, y) => {
+    const notDraggableNodeList = container.querySelectorAll('li:not(.dragging)');
+    const notDraggable = Array.from(notDraggableNodeList);
+
+    const cursorY = y; // Y - координата курсора 
+    let minDistance = Infinity; // Минимальное расстояние до центра элемента
+    let closestItem = null;
+
+    notDraggable.forEach(item => {
+        const rect = item.getBoundingClientRect();
+        const itemCenterY = rect.top + rect.height / 2; // Центр элемента
+
+        // Проверяем, находится ли центр ниже курсора
+        if (itemCenterY > cursorY) {
+            const distance = itemCenterY - cursorY; // Расстояние от курсора до центра элемента
+
+            // Если расстояние меньше текущего минимума, обновляем
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestItem = item;
+            }
+        }
+    });
+    return(closestItem);
+}
+
+list.addEventListener('dragover', (e) => {
+    e.preventDefault(); //разрешаем сбрасывать перетаскиваемый элемент
+    const afterElement = getDragAfterElement(list, e.clientY); // Элемент, перед которым мы хотим встать (или null, если мы в самом низу).
+    const draggable = document.querySelector('.dragging'); // элемент, который мы тащим.
+    
+    if (!afterElement) {
+        list.appendChild(draggable);
+    }else{
+        list.insertBefore(draggable, afterElement);
+    }
+    
+});
+
+list.addEventListener('drop', (e) => {
+    e.preventDefault(); //разрешаем сбрасывать перетаскиваемый элемент
+    const allLiNodeList = list.querySelectorAll('li');
+    const allLiArray = Array.from(allLiNodeList);
+    const draggable = document.querySelector('.dragging');
+    const drgIndex = allLiArray.indexOf(draggable);
+    const drgElement = tasks[drgIndex];
+    const drgId = draggable.dataset.id;
+
+    if (!drgElement) {
+        console.log("drgElement undefined");
+    } else {
+        moveTodo(drgId, drgElement.position);
+    }
+    
+});
+
 render();
 loadInitialData()    
 

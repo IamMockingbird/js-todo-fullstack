@@ -113,3 +113,7 @@ textarea::placeholder{
     justify-content: center;
     cursor: default;
 }
+
+.dragging{
+    background-color: #192341;
+}

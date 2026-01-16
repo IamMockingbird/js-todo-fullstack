@@ -31,7 +31,7 @@ export const addTodo = async (todoText) => {
 
 export const toggleTodo = async (id) => {
     const response = await fetch ('http://localhost:3000/todos/' + id, {
-        method: `PATCH`,
+        method: `PATCH`
     })
     return await response.json();
 };
@@ -42,3 +42,15 @@ export const deleteTodo = async (id) =>{
     })
     return await response.json();
 };
+
+export const moveTodo = async (id, position) =>{
+    const mvData = {position: position};
+
+    const response = await fetch ('http://localhost:3000/todos/' + id + '/moving', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(mvData)
+    })
+}
