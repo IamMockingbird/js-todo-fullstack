@@ -3,12 +3,13 @@ import {fetchTodos, addTodo, toggleTodo, deleteTodo, moveTodo } from "./api.js";
 const input = document.getElementById('task-input');
 const btn = document.getElementById(`add-btn`);
 const list = document.getElementById('task-list');
+
 // 1. Пытаемся достать задачи из памяти. Если их нет - создаем пустой 
 // массив
 // JSON.parse преварщает строку обратно в массив
 let tasks = [];
 
-const createTaskElement = (task) =>{
+const createTaskElement = (task) => {
     // Создаем HTML
     const newLi = document.createElement('li');
     const liSpan = document.createElement('span');
@@ -18,6 +19,10 @@ const createTaskElement = (task) =>{
 
     // Обрабатываем перетаскивание
     newLi.addEventListener('dragstart', (e) =>{
+        
+        //Убираем картинку под курсором при перетаскивании
+        const img = new Image();
+        e.dataTransfer.setDragImage(img, 0, 0);
         newLi.classList.add('dragging');
     });
 
@@ -121,6 +126,7 @@ const loadInitialData = async () => {
 }
 
 const getDragAfterElement = (container, y) => {
+
     const notDraggableNodeList = container.querySelectorAll('li:not(.dragging)');
     const notDraggable = Array.from(notDraggableNodeList);
 
@@ -146,17 +152,71 @@ const getDragAfterElement = (container, y) => {
     return(closestItem);
 }
 
+let activeAfterElement = null; //переменная для сравнения с afterElement
+
 list.addEventListener('dragover', (e) => {
     e.preventDefault(); //разрешаем сбрасывать перетаскиваемый элемент
     const afterElement = getDragAfterElement(list, e.clientY); // Элемент, перед которым мы хотим встать (или null, если мы в самом низу).
-    const draggable = document.querySelector('.dragging'); // элемент, который мы тащим.
-    
-    if (!afterElement) {
-        list.appendChild(draggable);
-    }else{
-        list.insertBefore(draggable, afterElement);
-    }
-    
+
+    //Делаем проверку, что бы не грузить браузер, если нет смещения задачи
+    if (activeAfterElement === afterElement) {
+        return
+    } else {
+        
+        activeAfterElement = afterElement;
+        
+        const draggable = document.querySelector('.dragging'); // элемент, который мы тащим.
+        
+        //Получаем положение всех li в list для анимации
+        const allLiNodeList = list.querySelectorAll('li');
+        const allLiArray = Array.from(allLiNodeList);
+
+        //получаем положение всех li до переноса
+        const allLiPosition = allLiArray.map((element) => {
+            const rect = element.getBoundingClientRect().top;
+            
+            return{
+                id: element.dataset.id,
+                top: rect
+            };
+        });
+
+        if (!afterElement) {
+            list.appendChild(draggable);
+        }else{
+            list.insertBefore(draggable, afterElement);
+        }
+        
+        allLiArray.forEach(element => {
+            //Находим новую позицию элемента
+            const newRect = element.getBoundingClientRect().top;
+
+            //По id находим старю позицию передвинутого элемента
+            const targetLiId = element.dataset.id
+            const foundLi = allLiPosition.find(item => item.id === targetLiId);
+            const liOldPosition = foundLi.top;
+            
+            //Находм разницу между ними 
+            const delta = liOldPosition - newRect;
+
+            //перенсим li обатно на столько же пикселей, насколько отнесли
+            element.style.transform = `translateY(${delta}px) `;
+            element.style.transition = ``; //выключаем плавность
+        });
+
+        const play = () => {
+            
+            allLiArray.forEach (element => {
+
+                //делаем анимацию плавнее
+                element.style.transition = `transform 0.3s`;
+                //убираем перенос обратно
+                element.style.transform = ``;
+            });
+        }
+        window.requestAnimationFrame(play);
+
+    }   
 });
 
 list.addEventListener('drop', (e) => {
