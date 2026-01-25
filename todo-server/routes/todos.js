@@ -55,18 +55,9 @@ router.patch ('/:id/moving', async (req,res) =>{
     try {
         const idToMoving = req.params.id;
         const newPosition = req.body.position;
-        const DataWhithOldPosition = await pool.query('SELECT position FROM tasklist WHERE id = $1;', [idToMoving]);
-        const oldPosition = DataWhithOldPosition.rows[0].position;
 
-        if (newPosition > oldPosition) {
-           const ifPosDown = await pool.query('UPDATE tasklist SET position = position - 1 WHERE position > $1 AND position <= $2', [oldPosition, newPosition]);
-        }else{
-           const ifPosUp = await pool.query('UPDATE tasklist SET position = position + 1 WHERE position < $1 AND position >= $2', [oldPosition, newPosition]);
-        }
+        const updatePos = await pool.query('WITH old_pos AS (SELECT position FROM tasklist WHERE id = $2), move_neighbors AS (UPDATE tasklist SET position = tasklist.position + ( CASE WHEN tasklist.position > old_pos.position AND tasklist.position <= $1 THEN -1 ELSE 1 END) FROM old_pos WHERE tasklist.position BETWEEN SYMMETRIC $1 AND old_pos.position AND id != $2) UPDATE tasklist SET position = $1 WHERE id = $2', [newPosition, idToMoving]);
 
-        const updatePos = await pool.query('UPDATE tasklist SET position = $1 WHERE id = $2', [newPosition, idToMoving]);
-
-        console.log (idToMoving, newPosition);
         res.sendStatus(200);
     } catch (error) {
         console.error(error);
